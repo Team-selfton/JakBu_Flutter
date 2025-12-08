@@ -14,7 +14,10 @@ class AuthService {
         data: request.toJson(),
       );
       final authResponse = AuthResponse.fromJson(response.data);
-      await _apiClient.saveToken(authResponse.token);
+      await _apiClient.saveTokens(
+        authResponse.accessToken,
+        authResponse.refreshToken,
+      );
       return authResponse;
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
@@ -32,13 +35,36 @@ class AuthService {
         data: request.toJson(),
       );
       final authResponse = AuthResponse.fromJson(response.data);
-      await _apiClient.saveToken(authResponse.token);
+      await _apiClient.saveTokens(
+        authResponse.accessToken,
+        authResponse.refreshToken,
+      );
       return authResponse;
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
         throw Exception('Invalid account ID or password');
       }
       throw Exception('Failed to login: ${e.message}');
+    }
+  }
+
+  Future<AuthResponse> refreshToken(RefreshTokenRequest request) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/auth/refresh-token',
+        data: request.toJson(),
+      );
+      final authResponse = AuthResponse.fromJson(response.data);
+      await _apiClient.saveTokens(
+        authResponse.accessToken,
+        authResponse.refreshToken,
+      );
+      return authResponse;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        throw Exception('Invalid refresh token');
+      }
+      throw Exception('Failed to refresh token: ${e.message}');
     }
   }
 

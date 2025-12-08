@@ -32,19 +32,32 @@ class LoginRequest {
 }
 
 class AuthResponse {
-  final String token;
+  final String accessToken;
+  final String refreshToken;
   final int userId;
   final String name;
 
   AuthResponse({
-    required this.token,
+    required this.accessToken,
+    required this.refreshToken,
     required this.userId,
     required this.name,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
-        token: json['token'],
+        accessToken: json['accessToken'],
+        refreshToken: json['refreshToken'],
         userId: json['userId'],
         name: json['name'],
       );
+}
+
+class RefreshTokenRequest {
+  final String refreshToken;
+
+  RefreshTokenRequest({required this.refreshToken});
+
+  Map<String, dynamic> toJson() => {
+        'refreshToken': refreshToken,
+      };
 }

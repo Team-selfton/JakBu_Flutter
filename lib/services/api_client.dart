@@ -45,7 +45,24 @@ class ApiClient {
           }
           return handler.next(options);
         },
-        onError: (error, handler) {
+        onError: (error, handler) async {
+          // 401 에러 발생 시 토큰 리프레시 시도
+          if (error.response?.statusCode == 401) {
+            final refreshResult = await refreshAccessToken();
+
+            if (refreshResult != null) {
+              // 토큰 리프레시 성공 - 원래 요청 재시도
+              final options = error.requestOptions;
+              options.headers['Authorization'] = 'Bearer ${refreshResult['accessToken']}';
+
+              try {
+                final response = await _dio.fetch(options);
+                return handler.resolve(response);
+              } catch (e) {
+                return handler.next(error);
+              }
+            }
+          }
           return handler.next(error);
         },
       ),
@@ -127,20 +144,52 @@ class ApiClient {
 
   Dio get dio => _dio;
 
-  Future<void> saveToken(String token) async {
-    await _storage.write(key: 'jwt_token', value: token);
+  Future<void> saveTokens(String accessToken, String refreshToken) async {
+    await _storage.write(key: 'access_token', value: accessToken);
+    await _storage.write(key: 'refresh_token', value: refreshToken);
   }
 
   Future<String?> getToken() async {
-    return await _storage.read(key: 'jwt_token');
+    return await _storage.read(key: 'access_token');
+  }
+
+  Future<String?> getRefreshToken() async {
+    return await _storage.read(key: 'refresh_token');
   }
 
   Future<void> deleteToken() async {
-    await _storage.delete(key: 'jwt_token');
+    await _storage.delete(key: 'access_token');
+    await _storage.delete(key: 'refresh_token');
   }
 
   Future<bool> hasToken() async {
     final token = await getToken();
     return token != null && token.isNotEmpty;
+  }
+
+  Future<Map<String, dynamic>?> refreshAccessToken() async {
+    try {
+      final refreshToken = await getRefreshToken();
+      if (refreshToken == null) return null;
+
+      final response = await _dio.post(
+        '/auth/refresh-token',
+        data: {'refreshToken': refreshToken},
+        options: Options(
+          headers: {}, // 헤더에서 Authorization 제거
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final accessToken = response.data['accessToken'];
+        final newRefreshToken = response.data['refreshToken'];
+        await saveTokens(accessToken, newRefreshToken);
+        return response.data;
+      }
+    } catch (e) {
+      // 리프레시 실패 시 토큰 삭제
+      await deleteToken();
+    }
+    return null;
   }
 }
