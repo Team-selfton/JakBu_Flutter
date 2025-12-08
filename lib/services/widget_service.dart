@@ -18,7 +18,7 @@ class WidgetService {
 
   static Future<void> initWidget() async {
     try {
-      await HomeWidget.setAppGroupId('YOUR_GROUP_ID');
+      await HomeWidget.setAppGroupId('group.com.example.jakbu_flutter');
     } catch (e) {
       print('Error initializing widget: $e');
     }
