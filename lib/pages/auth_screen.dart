@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/api_client.dart';
+import '../services/auth_service.dart';
+import '../models/auth_models.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onLoginComplete;
@@ -11,32 +14,82 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool _isLogin = true;
-  final _emailController = TextEditingController();
+  bool _isLoading = false;
+  final _accountIdController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
+  late final AuthService _authService;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = AuthService(ApiClient());
+  }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _accountIdController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
-  void _handleSubmit() {
-    // 이메일/비밀번호 로그인 시뮬레이션
-    debugPrint(_isLogin ? '로그인 진행 중...' : '회원가입 진행 중...');
-    Future.delayed(const Duration(milliseconds: 500), () {
-      widget.onLoginComplete();
+  Future<void> _handleSubmit() async {
+    if (_accountIdController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      _showError('Account ID와 비밀번호를 입력해주세요');
+      return;
+    }
+
+    if (!_isLogin && _nameController.text.trim().isEmpty) {
+      _showError('이름을 입력해주세요');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
     });
+
+    try {
+      if (_isLogin) {
+        await _authService.login(
+          LoginRequest(
+            accountId: _accountIdController.text.trim(),
+            password: _passwordController.text.trim(),
+          ),
+        );
+      } else {
+        await _authService.signup(
+          SignupRequest(
+            accountId: _accountIdController.text.trim(),
+            password: _passwordController.text.trim(),
+            name: _nameController.text.trim(),
+          ),
+        );
+      }
+      if (mounted) {
+        widget.onLoginComplete();
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError(e.toString().replaceAll('Exception: ', ''));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
-  void _handleKakaoLogin() {
-    // 카카오 로그인 시뮬레이션
-    debugPrint('카카오 로그인 진행 중...');
-    Future.delayed(const Duration(milliseconds: 500), () {
-      widget.onLoginComplete();
-    });
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
@@ -130,9 +183,9 @@ class _AuthScreenState extends State<AuthScreen> {
                               const SizedBox(height: 16),
                             ],
                             _buildTextField(
-                              controller: _emailController,
-                              hintText: '이메일',
-                              textInputType: TextInputType.emailAddress,
+                              controller: _accountIdController,
+                              hintText: 'Account ID',
+                              textInputType: TextInputType.text,
                             ),
                             const SizedBox(height: 16),
                             _buildTextField(
@@ -162,92 +215,26 @@ class _AuthScreenState extends State<AuthScreen> {
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: _handleSubmit,
+                                  onTap: _isLoading ? null : _handleSubmit,
                                   borderRadius: BorderRadius.circular(16),
                                   child: Center(
-                                    child: Text(
-                                      _isLogin ? '로그인' : '회원가입',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // Divider
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Divider(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    thickness: 1,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  child: Text(
-                                    '또는',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white.withValues(alpha: 0.6),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Divider(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    thickness: 1,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-
-                            // Kakao Login Button
-                            Container(
-                              width: double.infinity,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEE500),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFFFEE500).withValues(alpha: 0.3),
-                                    blurRadius: 16,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: _handleKakaoLogin,
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: const Center(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.chat_bubble,
-                                          color: Color(0xFF000000),
-                                          size: 20,
-                                        ),
-                                        SizedBox(width: 12),
-                                        Text(
-                                          '카카오 로그인',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF000000),
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : Text(
+                                            _isLogin ? '로그인' : '회원가입',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
                                   ),
                                 ),
                               ),

@@ -1,20 +1,8 @@
 import 'package:flutter/material.dart';
-
-enum Priority { low, medium, high }
-
-class Todo {
-  final String id;
-  final String text;
-  final Priority priority;
-  bool completed;
-
-  Todo({
-    required this.id,
-    required this.text,
-    required this.priority,
-    this.completed = false,
-  });
-}
+import 'package:intl/intl.dart';
+import '../services/api_client.dart';
+import '../services/todo_service.dart';
+import '../models/todo_models.dart';
 
 class TodoPage extends StatefulWidget {
   const TodoPage({super.key});
@@ -24,9 +12,17 @@ class TodoPage extends StatefulWidget {
 }
 
 class _TodoPageState extends State<TodoPage> {
-  final List<Todo> _todos = [];
+  List<TodoModel> _todos = [];
   final TextEditingController _textController = TextEditingController();
-  Priority _selectedPriority = Priority.medium;
+  late final TodoService _todoService;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _todoService = TodoService(ApiClient());
+    _loadTodayTodos();
+  }
 
   @override
   void dispose() {
@@ -34,59 +30,100 @@ class _TodoPageState extends State<TodoPage> {
     super.dispose();
   }
 
-  void _addTodo() {
+  Future<void> _loadTodayTodos() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final todos = await _todoService.getTodayTodos();
+      if (mounted) {
+        setState(() {
+          _todos = todos;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError('할일 목록을 불러오는데 실패했습니다: ${e.toString()}');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _addTodo() async {
     if (_textController.text.trim().isEmpty) return;
 
-    setState(() {
-      _todos.add(Todo(
-        id: DateTime.now().toString(),
-        text: _textController.text.trim(),
-        priority: _selectedPriority,
-      ));
-      _textController.clear();
-      _selectedPriority = Priority.medium;
-    });
-  }
+    try {
+      final newTodo = await _todoService.createTodo(
+        CreateTodoRequest(
+          title: _textController.text.trim(),
+          date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        ),
+      );
 
-  void _toggleTodo(String id) {
-    setState(() {
-      final todo = _todos.firstWhere((t) => t.id == id);
-      todo.completed = !todo.completed;
-    });
-  }
-
-  void _deleteTodo(String id) {
-    setState(() {
-      _todos.removeWhere((t) => t.id == id);
-    });
-  }
-
-  Color _getPriorityColor(Priority priority) {
-    switch (priority) {
-      case Priority.high:
-        return Colors.red.shade500;
-      case Priority.medium:
-        return Colors.yellow.shade600;
-      case Priority.low:
-        return Colors.green.shade500;
+      if (mounted) {
+        setState(() {
+          _todos.add(newTodo);
+          _textController.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError('할일 추가에 실패했습니다: ${e.toString()}');
+      }
     }
   }
 
-  String _getPriorityLabel(Priority priority) {
-    switch (priority) {
-      case Priority.high:
-        return '높음';
-      case Priority.medium:
-        return '중간';
-      case Priority.low:
-        return '낮음';
+  Future<void> _toggleTodo(int id) async {
+    final todoIndex = _todos.indexWhere((t) => t.id == id);
+    if (todoIndex == -1) return;
+
+    final todo = _todos[todoIndex];
+    if (todo.status == TodoStatus.DONE) {
+      _showError('이미 완료된 할일입니다');
+      return;
     }
+
+    try {
+      final updatedTodo = await _todoService.markTodoDone(id);
+      if (mounted) {
+        setState(() {
+          _todos[todoIndex] = updatedTodo;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError('할일 완료 처리에 실패했습니다: ${e.toString()}');
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final activeTodos = _todos.where((todo) => !todo.completed).toList();
-    final completedTodos = _todos.where((todo) => todo.completed).toList();
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF5b8dd5),
+        ),
+      );
+    }
+
+    final activeTodos = _todos.where((todo) => todo.status == TodoStatus.TODO).toList();
+    final completedTodos = _todos.where((todo) => todo.status == TodoStatus.DONE).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
@@ -182,43 +219,51 @@ class _TodoPageState extends State<TodoPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildPrioritySelector(),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF5b8dd5), Color(0xFF4a7bc0)],
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF5b8dd5), Color(0xFF4a7bc0)],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF5b8dd5).withOpacity(0.4),
-                            blurRadius: 16,
-                            spreadRadius: 2,
-                          ),
-                        ],
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF5b8dd5).withOpacity(0.4),
+                        blurRadius: 16,
+                        spreadRadius: 2,
                       ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: _addTodo,
-                          borderRadius: BorderRadius.circular(16),
-                          child: const Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 24,
-                          ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _addTodo,
+                      borderRadius: BorderRadius.circular(16),
+                      child: const Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              '추가하기',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -312,54 +357,7 @@ class _TodoPageState extends State<TodoPage> {
     );
   }
 
-  Widget _buildPrioritySelector() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-        ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<Priority>(
-          value: _selectedPriority,
-          onChanged: (Priority? value) {
-            if (value != null) {
-              setState(() {
-                _selectedPriority = value;
-              });
-            }
-          },
-          dropdownColor: const Color(0xFF1e2a3f),
-          icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-          items: Priority.values.map((Priority priority) {
-            return DropdownMenuItem<Priority>(
-              value: priority,
-              child: Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: _getPriorityColor(priority),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(_getPriorityLabel(priority)),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTodoSection(String title, List<Todo> todos, bool isCompleted) {
+  Widget _buildTodoSection(String title, List<TodoModel> todos, bool isCompleted) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -397,13 +395,13 @@ class _TodoPageState extends State<TodoPage> {
             ),
           ),
           const SizedBox(height: 12),
-          ...todos.map((todo) => _buildTodoItem(todo, isCompleted)).toList(),
+          ...todos.map((todo) => _buildTodoItem(todo, isCompleted)),
         ],
       ),
     );
   }
 
-  Widget _buildTodoItem(Todo todo, bool isCompleted) {
+  Widget _buildTodoItem(TodoModel todo, bool isCompleted) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -422,7 +420,7 @@ class _TodoPageState extends State<TodoPage> {
               height: 24,
               decoration: BoxDecoration(
                 color: isCompleted
-                    ? _getPriorityColor(todo.priority)
+                    ? const Color(0xFF5b8dd5)
                     : Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
                 border: isCompleted
@@ -444,38 +442,13 @@ class _TodoPageState extends State<TodoPage> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              todo.text,
+              todo.title,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: Colors.white,
                 decoration:
                     isCompleted ? TextDecoration.lineThrough : null,
-              ),
-            ),
-          ),
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(
-              color: _getPriorityColor(todo.priority),
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => _deleteTodo(todo.id),
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.close,
-                color: Colors.red.shade400,
-                size: 16,
               ),
             ),
           ),
