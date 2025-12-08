@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'pages/splash_screen.dart';
 import 'pages/auth_screen.dart';
 import 'pages/main_app.dart';
+import 'services/widget_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await WidgetService.initWidget();
   runApp(const MyApp());
 }
 
