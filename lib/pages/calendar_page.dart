@@ -26,7 +26,29 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   int? _selectedDate;
   final List<Todo> _todos = []; // TODO: 실제로는 전역 상태 관리 필요
-  final String _currentMonth = '2025년 12월';
+  DateTime _currentDate = DateTime.now();
+
+  String get _currentMonth {
+    return '${_currentDate.year}년 ${_currentDate.month}월';
+  }
+
+  int get _daysInMonth {
+    return DateTime(_currentDate.year, _currentDate.month + 1, 0).day;
+  }
+
+  void _previousMonth() {
+    setState(() {
+      _currentDate = DateTime(_currentDate.year, _currentDate.month - 1);
+      _selectedDate = null;
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      _currentDate = DateTime(_currentDate.year, _currentDate.month + 1);
+      _selectedDate = null;
+    });
+  }
 
   Color _getPriorityColor(Priority priority) {
     switch (priority) {
@@ -43,12 +65,14 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     final activeTodos = _todos.where((todo) => !todo.completed).toList();
     final completedTodos = _todos.where((todo) => todo.completed).toList();
-    final todayDate = DateTime.now().day;
+    final now = DateTime.now();
+    final todayDate = now.day;
+    final isCurrentMonth = _currentDate.year == now.year && _currentDate.month == now.month;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Title
           const SizedBox(height: 24),
@@ -109,7 +133,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () {},
+                          onPressed: _previousMonth,
                           icon: Icon(
                             Icons.chevron_left,
                             color: Colors.white.withOpacity(0.7),
@@ -131,7 +155,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           ),
                         ),
                         IconButton(
-                          onPressed: () {},
+                          onPressed: _nextMonth,
                           icon: Icon(
                             Icons.chevron_right,
                             color: Colors.white.withOpacity(0.7),
@@ -175,11 +199,11 @@ class _CalendarPageState extends State<CalendarPage> {
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
                   ),
-                  itemCount: 31,
+                  itemCount: _daysInMonth,
                   itemBuilder: (context, index) {
                     final day = index + 1;
                     final isSelected = _selectedDate == day;
-                    final isToday = day == todayDate;
+                    final isToday = isCurrentMonth && day == todayDate;
 
                     return GestureDetector(
                       onTap: () {
@@ -250,17 +274,17 @@ class _CalendarPageState extends State<CalendarPage> {
           // Selected date content
           if (_selectedDate != null) ...[
             const SizedBox(height: 20),
-            if (_selectedDate == todayDate && activeTodos.isNotEmpty)
+            if (isCurrentMonth && _selectedDate == todayDate && activeTodos.isNotEmpty)
               _buildTodoSection('$_selectedDate일 Todo', activeTodos, false),
-            if (_selectedDate == todayDate && completedTodos.isNotEmpty) ...[
+            if (isCurrentMonth && _selectedDate == todayDate && completedTodos.isNotEmpty) ...[
               const SizedBox(height: 16),
               _buildTodoSection('$_selectedDate일 Done', completedTodos, true),
             ],
-            if (_selectedDate == todayDate &&
+            if (isCurrentMonth && _selectedDate == todayDate &&
                 activeTodos.isEmpty &&
                 completedTodos.isEmpty)
               _buildEmptyState('이 날짜에 할일이 없습니다'),
-            if (_selectedDate != todayDate)
+            if (!isCurrentMonth || _selectedDate != todayDate)
               _buildEmptyState('과거/미래 날짜는 오늘의 할일만 표시됩니다'),
           ],
 

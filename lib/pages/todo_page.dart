@@ -89,9 +89,9 @@ class _TodoPageState extends State<TodoPage> {
     final completedTodos = _todos.where((todo) => todo.completed).toList();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Title
           const SizedBox(height: 24),
