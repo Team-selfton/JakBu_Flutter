@@ -82,6 +82,29 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
+  Future<void> _toggleTodo(int id) async {
+    final todoIndex = _todos.indexWhere((t) => t.id == id);
+    if (todoIndex == -1) return;
+
+    try {
+      final updatedTodo = await _todoService.toggleTodoStatus(id);
+      if (mounted) {
+        setState(() {
+          _todos[todoIndex] = updatedTodo;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('할일 상태 변경에 실패했습니다: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeTodos = _todos.where((todo) => todo.status == TodoStatus.TODO).toList();
@@ -457,53 +480,56 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Widget _buildTodoItem(TodoModel todo, bool isCompleted) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isCompleted
-            ? Colors.white.withOpacity(0.05)
-            : Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: isCompleted
-                  ? const Color(0xFF5b8dd5)
-                  : Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-              border: isCompleted
-                  ? null
-                  : Border.all(
-                      color: Colors.white.withOpacity(0.4),
-                      width: 2,
-                    ),
+    return GestureDetector(
+      onTap: () => _toggleTodo(todo.id),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isCompleted
+              ? Colors.white.withOpacity(0.05)
+              : Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: isCompleted
+                    ? const Color(0xFF5b8dd5)
+                    : Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+                border: isCompleted
+                    ? null
+                    : Border.all(
+                        color: Colors.white.withOpacity(0.4),
+                        width: 2,
+                      ),
+              ),
+              child: isCompleted
+                  ? const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    )
+                  : null,
             ),
-            child: isCompleted
-                ? const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 16,
-                  )
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              todo.title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-                decoration: isCompleted ? TextDecoration.lineThrough : null,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                todo.title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  decoration: isCompleted ? TextDecoration.lineThrough : null,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
