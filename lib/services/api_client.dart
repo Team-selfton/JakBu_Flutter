@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiClient {
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = 'https://jakbu-api.dsmhs.kr';
   late Dio _dio;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -16,6 +16,20 @@ class ApiClient {
       },
     ));
 
+    // 로깅 인터셉터
+    _dio.interceptors.add(
+      LogInterceptor(
+        request: true,
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: true,
+        responseBody: true,
+        error: true,
+        logPrint: (obj) => print('[API] $obj'),
+      ),
+    );
+
+    // 인증 토큰 인터셉터
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
