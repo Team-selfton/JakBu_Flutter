@@ -26,6 +26,12 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _onAutoLogin() {
+    setState(() {
+      _currentScreen = AppScreen.main;
+    });
+  }
+
   void _onLoginComplete() {
     setState(() {
       _currentScreen = AppScreen.main;
@@ -42,7 +48,10 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       home: _currentScreen == AppScreen.splash
-          ? SplashScreen(onStart: _onStart)
+          ? SplashScreen(
+              onStart: _onStart,
+              onAutoLogin: _onAutoLogin,
+            )
           : _currentScreen == AppScreen.auth
               ? AuthScreen(onLoginComplete: _onLoginComplete)
               : const MainApp(),
