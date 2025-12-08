@@ -41,19 +41,20 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF1e2a3f),
-            Color(0xFF1a2332),
-            Color(0xFF0f1520),
-          ],
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF1e2a3f),
+              Color(0xFF1a2332),
+              Color(0xFF0f1520),
+            ],
+          ),
         ),
-      ),
-      child: SafeArea(
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
           child: Column(
@@ -271,6 +272,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -322,43 +324,46 @@ class _AuthScreenState extends State<AuthScreen> {
     bool obscureText = false,
     TextInputType textInputType = TextInputType.text,
   }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: textInputType,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-      ),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.4),
+    return Material(
+      color: Colors.transparent,
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: textInputType,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
         ),
-        filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.2),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: TextStyle(
+            color: Colors.white.withValues(alpha: 0.4),
           ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.2),
+          filled: true,
+          fillColor: Colors.white.withValues(alpha: 0.1),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: Colors.white.withValues(alpha: 0.2),
+            ),
           ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            color: Color(0xFF5b8dd5),
-            width: 2,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: Colors.white.withValues(alpha: 0.2),
+            ),
           ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 18,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(
+              color: Color(0xFF5b8dd5),
+              width: 2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 18,
+          ),
         ),
       ),
     );

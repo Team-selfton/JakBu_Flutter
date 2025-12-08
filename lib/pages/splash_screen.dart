@@ -7,19 +7,20 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF1e2a3f),
-            Color(0xFF1a2332),
-            Color(0xFF0f1520),
-          ],
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF1e2a3f),
+              Color(0xFF1a2332),
+              Color(0xFF0f1520),
+            ],
+          ),
         ),
-      ),
-      child: SafeArea(
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
           child: Column(
@@ -134,6 +135,7 @@ class SplashScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
