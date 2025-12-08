@@ -1,12 +1,35 @@
 import 'package:flutter/material.dart';
+import 'pages/splash_screen.dart';
+import 'pages/auth_screen.dart';
 import 'pages/main_app.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+enum AppScreen { splash, auth, main }
+
+class _MyAppState extends State<MyApp> {
+  AppScreen _currentScreen = AppScreen.splash;
+
+  void _onStart() {
+    setState(() {
+      _currentScreen = AppScreen.auth;
+    });
+  }
+
+  void _onLoginComplete() {
+    setState(() {
+      _currentScreen = AppScreen.main;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +40,11 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      home: const MainApp(),
+      home: _currentScreen == AppScreen.splash
+          ? SplashScreen(onStart: _onStart)
+          : _currentScreen == AppScreen.auth
+              ? AuthScreen(onLoginComplete: _onLoginComplete)
+              : const MainApp(),
     );
   }
 }
