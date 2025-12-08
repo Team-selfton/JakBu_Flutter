@@ -22,6 +22,9 @@ class _CalendarPageState extends State<CalendarPage> {
   void initState() {
     super.initState();
     _todoService = TodoService(ApiClient());
+    // 오늘 날짜를 자동으로 선택하고 할일 조회
+    _selectedDate = DateTime.now().day;
+    _loadTodosByDate(DateTime.now());
   }
 
   String get _currentMonth {

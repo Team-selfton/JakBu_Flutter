@@ -83,14 +83,8 @@ class _TodoPageState extends State<TodoPage> {
     final todoIndex = _todos.indexWhere((t) => t.id == id);
     if (todoIndex == -1) return;
 
-    final todo = _todos[todoIndex];
-    if (todo.status == TodoStatus.DONE) {
-      _showError('이미 완료된 할일입니다');
-      return;
-    }
-
     try {
-      final updatedTodo = await _todoService.markTodoDone(id);
+      final updatedTodo = await _todoService.toggleTodoStatus(id);
       if (mounted) {
         setState(() {
           _todos[todoIndex] = updatedTodo;
@@ -98,7 +92,7 @@ class _TodoPageState extends State<TodoPage> {
       }
     } catch (e) {
       if (mounted) {
-        _showError('할일 완료 처리에 실패했습니다: ${e.toString()}');
+        _showError('할일 상태 변경에 실패했습니다: ${e.toString()}');
       }
     }
   }

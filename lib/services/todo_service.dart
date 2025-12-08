@@ -44,7 +44,7 @@ class TodoService {
     }
   }
 
-  Future<TodoModel> markTodoDone(int todoId) async {
+  Future<TodoModel> toggleTodoStatus(int todoId) async {
     try {
       final response = await _apiClient.dio.post('/todo/$todoId/done');
       return TodoModel.fromJson(response.data);
@@ -52,7 +52,7 @@ class TodoService {
       if (e.response?.statusCode == 400) {
         throw Exception(e.response?.data['message'] ?? 'Todo not found');
       }
-      throw Exception('Failed to mark todo done: ${e.message}');
+      throw Exception('Failed to toggle todo status: ${e.message}');
     }
   }
 }
