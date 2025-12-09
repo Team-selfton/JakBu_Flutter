@@ -3,7 +3,14 @@
     "allow": [
       "Bash(git reset:*)",
       "Bash(git push:*)",
-      "Bash(flutter clean:*)"
+      "Bash(flutter clean:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(pod install)",
+      "Bash(flutter create:*)",
+      "Bash(flutter build:*)",
+      "Bash(flutter run:*)",
+      "Bash(xcodebuild clean:*)",
+      "Bash(flutter precache:*)"
     ],
     "deny": [],
     "ask": []

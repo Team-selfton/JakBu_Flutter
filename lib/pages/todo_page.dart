@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/api_client.dart';
 import '../services/todo_service.dart';
+import '../services/live_activity_service.dart';
 import '../models/todo_models.dart';
 
 class TodoPage extends StatefulWidget {
@@ -15,6 +16,7 @@ class _TodoPageState extends State<TodoPage> {
   List<TodoModel> _todos = [];
   final TextEditingController _textController = TextEditingController();
   late final TodoService _todoService;
+  final LiveActivityService _liveActivityService = LiveActivityService();
   bool _isLoading = false;
 
   @override
@@ -22,6 +24,11 @@ class _TodoPageState extends State<TodoPage> {
     super.initState();
     _todoService = TodoService(ApiClient());
     _loadTodayTodos();
+    _initializeLiveActivity();
+  }
+
+  Future<void> _initializeLiveActivity() async {
+    await _liveActivityService.getAllActivities();
   }
 
   @override
@@ -41,6 +48,8 @@ class _TodoPageState extends State<TodoPage> {
         setState(() {
           _todos = todos;
         });
+        // Live Activity 업데이트
+        await _liveActivityService.updateActivity(_todos);
       }
     } catch (e) {
       if (mounted) {
@@ -71,6 +80,8 @@ class _TodoPageState extends State<TodoPage> {
           _todos.add(newTodo);
           _textController.clear();
         });
+        // Live Activity 업데이트
+        await _liveActivityService.updateActivity(_todos);
       }
     } catch (e) {
       if (mounted) {
@@ -89,6 +100,8 @@ class _TodoPageState extends State<TodoPage> {
         setState(() {
           _todos[todoIndex] = updatedTodo;
         });
+        // Live Activity 업데이트
+        await _liveActivityService.updateActivity(_todos);
       }
     } catch (e) {
       if (mounted) {
