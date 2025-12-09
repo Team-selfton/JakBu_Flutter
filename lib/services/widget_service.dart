@@ -7,17 +7,11 @@ class WidgetService {
   static Future<void> updateWidget(List<TodoModel> todos) async {
     try {
       // Todo 리스트를 JSON으로 변환
-      final totalCount = todos.length;
-      final completedCount = todos.where((todo) => todo.status == TodoStatus.done).length;
       final todosJson = jsonEncode(todos.map((todo) => {
         'id': todo.id,
         'title': todo.title,
         'isDone': todo.status == TodoStatus.done,
       }).toList());
-
-      // 디버깅을 위해 개별 값 저장
-      await HomeWidget.saveWidgetData('total_count', totalCount);
-      await HomeWidget.saveWidgetData('completed_count', completedCount);
 
       // Android & iOS용 데이터 저장
       await HomeWidget.saveWidgetData('widget_todos', todosJson);

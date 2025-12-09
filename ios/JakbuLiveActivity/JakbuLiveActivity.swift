@@ -38,23 +38,18 @@ struct TodoProvider: TimelineProvider {
 
     private func loadTodoEntry() -> TodoEntry {
         var todos: [TodoWidgetItem] = []
-        
-        // 디버깅을 위해 개별 값을 먼저 읽습니다.
-        let totalCount = sharedDefaults?.integer(forKey: "total_count") ?? -1
-        let completedCount = sharedDefaults?.integer(forKey: "completed_count") ?? -1
+        var totalCount = 0
+        var completedCount = 0
 
-        // JSON 디코딩을 시도하되, 실패하면 디버그 값을 사용합니다.
-        if let data = sharedDefaults?.data(forKey: "widget_todos"),
+        if let jsonString = sharedDefaults?.string(forKey: "widget_todos"),
+           let data = jsonString.data(using: .utf8),
            let decodedTodos = try? JSONDecoder().decode([TodoWidgetItem].self, from: data) {
             todos = decodedTodos
-            // JSON이 유효하면, 해당 카운트를 사용합니다.
-            let jsonTotal = todos.count
-            let jsonCompleted = todos.filter { $0.isDone }.count
-            return TodoEntry(date: Date(), todos: todos, totalCount: jsonTotal, completedCount: jsonCompleted)
+            totalCount = todos.count
+            completedCount = todos.filter { $0.isDone }.count
         }
 
-        // JSON 디코딩이 실패하면, 디버그 값으로 항목을 반환합니다.
-        return TodoEntry(date: Date(), todos: [], totalCount: totalCount, completedCount: completedCount)
+        return TodoEntry(date: Date(), todos: todos, totalCount: totalCount, completedCount: completedCount)
     }
 }
 
