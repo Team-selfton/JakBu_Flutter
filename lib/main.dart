@@ -14,7 +14,17 @@ late FCMService fcmService;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 먼저 앱 UI를 시작
+  runApp(const MyApp());
+
+  // Firebase 초기화를 백그라운드에서 실행
+  _initializeFirebase();
+}
+
+Future<void> _initializeFirebase() async {
   try {
+    debugPrint('🔄 Firebase 초기화 시작...');
+
     // Firebase 초기화
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -29,12 +39,11 @@ void main() async {
     fcmService = FCMService(notificationService);
     await fcmService.initialize();
 
-    debugPrint('✅ 앱 초기화 완료');
-  } catch (e) {
-    debugPrint('❌ 앱 초기화 실패: $e');
+    debugPrint('✅ FCM 초기화 완료');
+  } catch (e, stackTrace) {
+    debugPrint('❌ Firebase 초기화 실패: $e');
+    debugPrint('스택 트레이스: $stackTrace');
   }
-
-  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {

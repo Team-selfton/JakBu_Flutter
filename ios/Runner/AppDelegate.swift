@@ -15,6 +15,9 @@ import FirebaseMessaging
       UNUserNotificationCenter.current().delegate = self
     }
 
+    // APNs 등록 요청
+    application.registerForRemoteNotifications()
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
