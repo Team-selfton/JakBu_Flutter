@@ -30,13 +30,13 @@ class _TodoPageState extends State<TodoPage> {
     super.initState();
     _todoService = TodoService(ApiClient());
     _loadTodayTodos();
-    _initializeLiveActivity();
+    // _initializeLiveActivity(); // LiveActivity 비활성화
     _initializeWidget();
   }
 
-  Future<void> _initializeLiveActivity() async {
-    await _liveActivityService.getAllActivities();
-  }
+  // Future<void> _initializeLiveActivity() async {
+  //   await _liveActivityService.getAllActivities();
+  // }
 
   Future<void> _initializeWidget() async {
     await WidgetService.initWidget();
@@ -64,7 +64,7 @@ class _TodoPageState extends State<TodoPage> {
               _todos.where((todo) => todo.status == TodoStatus.done).toList();
         });
         // Live Activity 업데이트
-        await _liveActivityService.updateActivity(_todos);
+        // await _liveActivityService.updateActivity(_todos); // LiveActivity 비활성화
         // 위젯 업데이트
         await WidgetService.updateWidget(_todos);
       }
@@ -102,7 +102,7 @@ class _TodoPageState extends State<TodoPage> {
         });
 
         // Live Activity 업데이트
-        await _liveActivityService.updateActivity(_todos);
+        // await _liveActivityService.updateActivity(_todos); // LiveActivity 비활성화
         // 위젯 업데이트
         await WidgetService.updateWidget(_todos);
       }
@@ -157,7 +157,7 @@ class _TodoPageState extends State<TodoPage> {
     _todos[todoIndex] = updatedItem;
 
     // Trigger updates for widgets
-    await _liveActivityService.updateActivity(_todos);
+    // await _liveActivityService.updateActivity(_todos); // LiveActivity 비활성화
     await WidgetService.updateWidget(_todos);
 
     // --- API Call ---

@@ -52,14 +52,65 @@ class MyApp extends StatefulWidget {
 
 enum AppScreen { splash, auth, main }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   AppScreen _currentScreen = AppScreen.splash;
+  DateTime? _pausedTime;
+  static const _resetDuration = Duration(minutes: 5); // 5분 이상 백그라운드면 리셋
 
   @override
   void initState() {
     super.initState();
     // API 인증 실패 시 로그인 화면으로 이동하는 콜백 설정
     onAuthenticationFailed = _onLogout;
+    // 앱 라이프사이클 옵저버 등록
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    debugPrint('📱 앱 라이프사이클 변경: $state');
+
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        // 앱이 백그라운드로 갈 때 시간 기록
+        _pausedTime = DateTime.now();
+        debugPrint('📱 앱이 백그라운드로 이동: $_pausedTime');
+        break;
+
+      case AppLifecycleState.resumed:
+        // 앱이 포그라운드로 돌아올 때
+        if (_pausedTime != null) {
+          final difference = DateTime.now().difference(_pausedTime!);
+          debugPrint('📱 앱이 포그라운드로 복귀 - 백그라운드 시간: ${difference.inSeconds}초');
+
+          // 일정 시간 이상 백그라운드에 있었다면 스플래시로 리셋
+          if (difference > _resetDuration) {
+            debugPrint('🔄 장시간 백그라운드 - 스플래시로 리셋');
+            setState(() {
+              _currentScreen = AppScreen.splash;
+            });
+          }
+          _pausedTime = null;
+        }
+        break;
+
+      case AppLifecycleState.detached:
+        debugPrint('📱 앱 종료');
+        break;
+
+      case AppLifecycleState.hidden:
+        debugPrint('📱 앱 숨김');
+        break;
+    }
   }
 
   void _onStart() {

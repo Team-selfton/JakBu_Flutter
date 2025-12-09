@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 import '../models/todo_models.dart';
 
@@ -16,23 +18,27 @@ class WidgetService {
       // Android & iOS용 데이터 저장
       await HomeWidget.saveWidgetData('widget_todos', todosJson);
 
-      // Android 및 iOS 위젯 업데이트를 단일 호출로 결합
-      await HomeWidget.updateWidget(
-        androidName: 'JakbuWidget',
-        iOSName: 'JakbuLiveActivity',
-      );
+      // 플랫폼별 위젯 업데이트
+      if (!kIsWeb && Platform.isAndroid) {
+        await HomeWidget.updateWidget(androidName: 'JakbuWidget');
+      } else if (!kIsWeb && Platform.isIOS) {
+        await HomeWidget.updateWidget(iOSName: 'JakbuLiveActivity');
+      }
     } catch (e) {
-      print('Failed to update widget: $e');
+      debugPrint('위젯 업데이트 실패: $e');
     }
   }
 
   // 위젯 초기화
   static Future<void> initWidget() async {
     try {
-      // App Group ID 설정 (iOS용)
-      await HomeWidget.setAppGroupId('group.ahyeonlee.jakbuFlutter');
+      // iOS에서만 App Group ID 설정
+      if (!kIsWeb && Platform.isIOS) {
+        await HomeWidget.setAppGroupId('group.ahyeonlee.jakbuFlutter');
+        debugPrint('✅ iOS 위젯 초기화 완료');
+      }
     } catch (e) {
-      print('Failed to initialize widget: $e');
+      debugPrint('위젯 초기화 실패: $e');
     }
   }
 }
