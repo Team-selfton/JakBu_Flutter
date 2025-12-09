@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
         // 토큰이 있으면 자동 로그인
         widget.onAutoLogin();
       }
-    },=;
+    }
   }
 
   @override
