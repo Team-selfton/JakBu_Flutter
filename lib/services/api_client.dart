@@ -1,9 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import '../main.dart' show navigatorKey;
-import '../pages/auth_screen.dart';
+import '../core/globals.dart';
 
 class ApiClient {
   static const String baseUrl = 'https://jakbu-api.dsmhs.kr';
@@ -66,7 +64,7 @@ class ApiClient {
               }
             } else {
               // 토큰 리프레시 실패 - 로그인 화면으로 이동
-              _navigateToLogin();
+              onAuthenticationFailed?.call();
             }
           }
           return handler.next(error);
@@ -165,27 +163,5 @@ class ApiClient {
       await deleteToken();
     }
     return null;
-  }
-
-  // 로그인 화면으로 이동하는 헬퍼 메서드
-  void _navigateToLogin() {
-    final context = navigatorKey.currentContext;
-    if (context != null) {
-      // 현재 화면이 AuthScreen이 아닌 경우에만 이동
-      final currentRoute = ModalRoute.of(context);
-      if (currentRoute?.settings.name != '/auth') {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => AuthScreen(
-              onLoginComplete: () {
-                // 로그인 완료 후 처리는 AuthScreen에서 처리
-              },
-            ),
-            settings: const RouteSettings(name: '/auth'),
-          ),
-          (route) => false, // 모든 이전 화면 제거
-        );
-      }
-    }
   }
 }

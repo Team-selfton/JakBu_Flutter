@@ -8,12 +8,10 @@ import 'pages/splash_screen.dart';
 import 'pages/auth_screen.dart';
 import 'services/local_notification_service.dart';
 import 'pages/main_app.dart';
+import 'core/globals.dart';
 
 // 전역 FCM 서비스 인스턴스
 late FCMService fcmService;
-
-// 전역 Navigator 키 (API 에러 시 로그인 화면으로 이동하기 위해 사용)
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,6 +63,13 @@ enum AppScreen { splash, auth, main }
 
 class _MyAppState extends State<MyApp> {
   AppScreen _currentScreen = AppScreen.splash;
+
+  @override
+  void initState() {
+    super.initState();
+    // API 인증 실패 시 로그인 화면으로 이동하는 콜백 설정
+    onAuthenticationFailed = _onLogout;
+  }
 
   void _onStart() {
     setState(() {
