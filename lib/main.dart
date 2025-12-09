@@ -1,55 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:jakbu_flutter/services/auth_service.dart';
 import 'firebase_options.dart';
-import 'services/fcm_service.dart';
-import 'services/notification_service.dart';
-import 'services/api_client.dart';
 import 'pages/splash_screen.dart';
 import 'pages/auth_screen.dart';
-import 'services/local_notification_service.dart';
 import 'pages/main_app.dart';
 import 'core/globals.dart';
-
-// 전역 FCM 서비스 인스턴스
-late FCMService fcmService;
+import 'services/local_notification_service.dart';
+import 'services/api_client.dart';
+import 'services/notification_service.dart';
+import 'services/fcm_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // runApp()을 호출하기 전에 모든 초기화가 완료되도록 기다립니다.
-  await _initializeFirebase();
-
-  // 모든 초기화가 완료된 후 앱 UI를 시작
+  await _initializeServices();
   runApp(const MyApp());
 }
 
-Future<void> _initializeFirebase() async {
-  try {
-    debugPrint('🔄 Firebase 초기화 시작...');
+Future<void> _initializeServices() async {
+  debugPrint('🔄 서비스 초기화 시작...');
 
-    // Firebase 초기화
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    debugPrint('✅ Firebase 초기화 완료');
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  debugPrint('✅ Firebase 초기화 완료');
 
-    // 로컬 알림 서비스 초기화
-    final localNotificationService = LocalNotificationService();
-    await localNotificationService.init();
+  localNotificationService = LocalNotificationService();
+  await localNotificationService.init();
 
-    // API 클라이언트 및 서비스 초기화
-    final apiClient = ApiClient();
-    final notificationService = NotificationService(apiClient);
+  // 매일 아침 8시 알림 스케줄링
+  await localNotificationService.scheduleDailyMorningNotification(
+    title: '작부 알림',
+    body: '오늘의 할 일을 확인해보세요!',
+  );
 
-    // FCM 서비스 초기화
-    fcmService = FCMService(notificationService, localNotificationService);
-    await fcmService.initialize();
+  apiClient = ApiClient();
+  authService = AuthService(apiClient);
+  notificationService = NotificationService(apiClient);
+  fcmService = FCMService(notificationService, localNotificationService);
+  await fcmService.initialize();
 
-    debugPrint('✅ FCM 초기화 완료');
-  } catch (e, stackTrace) {
-    debugPrint('❌ Firebase 초기화 실패: $e');
-    debugPrint('스택 트레이스: $stackTrace');
-  }
+  debugPrint('✅ 모든 서비스 초기화 완료');
 }
 
 class MyApp extends StatefulWidget {

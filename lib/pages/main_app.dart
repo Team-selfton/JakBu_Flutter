@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jakbu_flutter/services/api_client.dart';
 import 'package:jakbu_flutter/services/auth_service.dart';
+import 'package:jakbu_flutter/core/globals.dart';
 import 'todo_page.dart';
 import 'calendar_page.dart';
 
@@ -42,6 +43,24 @@ class _MainAppState extends State<MainApp> {
       if (mounted) {
         widget.onLogout();
       }
+    }
+  }
+
+  void _testNotification() async {
+    // 즉시 알림 테스트
+    await localNotificationService.showNotification(
+      id: 999,
+      title: '테스트 알림',
+      body: '푸시알림이 정상적으로 작동합니다!',
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('테스트 알림이 발송되었습니다'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -87,6 +106,11 @@ class _MainAppState extends State<MainApp> {
                         '캘린더',
                         1,
                       ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.notifications_active, color: Colors.amber),
+                      onPressed: _testNotification,
+                      tooltip: '알림 테스트',
                     ),
                     IconButton(
                       icon: const Icon(Icons.logout, color: Colors.white),

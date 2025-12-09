@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../main.dart';
+import '../core/globals.dart';
 
 class FCMTokenPage extends StatelessWidget {
   const FCMTokenPage({super.key});

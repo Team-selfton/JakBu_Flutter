@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/api_client.dart';
+import '../core/globals.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onStart;
@@ -16,7 +16,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final ApiClient _apiClient = ApiClient();
   bool _isChecking = true;
 
   @override
@@ -28,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkToken() async {
     await Future.delayed(const Duration(seconds: 1)); // 스플래시 최소 표시 시간
 
-    final hasToken = await _apiClient.hasToken();
+    final hasToken = await apiClient.hasToken();
     if (mounted) {
       setState(() {
         _isChecking = false;

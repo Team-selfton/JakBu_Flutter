@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/auth_models.dart';
 import 'api_client.dart';
-import '../main.dart'; // fcmService에 접근하기 위해 추가
+import '../core/globals.dart';
 
 class AuthService {
   final ApiClient _apiClient;
