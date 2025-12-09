@@ -11,22 +11,8 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
-
-    // This block is for Android projects
-    afterEvaluate {
-        // Apply only to subprojects that are Android applications or libraries
-        if (project.plugins.hasPlugin("com.android.application") || project.plugins.hasPlugin("com.android.library")) {
-            android {
-                compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_11
-                    targetCompatibility = JavaVersion.VERSION_11
-                }
-                kotlinOptions {
-                    jvmTarget = JavaVersion.VERSION_11.toString()
-                }
-            }
-        }
-    }
+}
+subprojects {
     project.evaluationDependsOn(":app")
 }
 
