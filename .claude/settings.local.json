@@ -11,7 +11,16 @@
       "Bash(flutter run:*)",
       "Bash(xcodebuild clean:*)",
       "Bash(flutter precache:*)",
-      "Bash(flutter upgrade:*)"
+      "Bash(flutter upgrade:*)",
+      "Bash(ls:*)",
+      "Bash(firebase login:*)",
+      "Bash(dart pub global activate:*)",
+      "Bash(export PATH=\"$PATH\":\"$HOME/.pub-cache/bin\")",
+      "Bash(echo:*)",
+      "Bash($HOME/.pub-cache/bin/flutterfire configure:*)",
+      "Bash(flutter devices:*)",
+      "Bash(adb shell:*)",
+      "Bash(adb -e emu kill:*)"
     ],
     "deny": [],
     "ask": []

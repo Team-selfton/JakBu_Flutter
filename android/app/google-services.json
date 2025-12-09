@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "454975006913",
+    "project_id": "fcmpractice-e8dff",
+    "storage_bucket": "fcmpractice-e8dff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:454975006913:android:5293cb3faaf48aff6c0c40",
+        "android_client_info": {
+          "package_name": "com.example.jakbu_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsj-6v7Mo2s7KfNZ_4dFQVN4o4u89aH-s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
