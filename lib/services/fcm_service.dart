@@ -102,6 +102,10 @@ class FCMService {
           return null;
         }
         debugPrint('✅ APNs 토큰 수신 완료.');
+      } else if (defaultTargetPlatform == TargetPlatform.android) {
+        // Android에서 SERVICE_NOT_AVAILABLE 오류를 방지하기 위해 약간의 지연 추가
+        debugPrint('ℹ️ Android에서 FCM 토큰 요청 전 2초 지연...');
+        await Future.delayed(const Duration(seconds: 2));
       }
 
       _fcmToken = await _firebaseMessaging.getToken();
