@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:jakbu_flutter/services/local_notification_service.dart';
 import 'notification_service.dart';
 
 // 백그라운드 메시지 핸들러 (최상위 함수여야 함)
@@ -16,9 +17,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class FCMService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final NotificationService _notificationService;
+  final LocalNotificationService _localNotificationService;
   String? _fcmToken;
 
-  FCMService(this._notificationService);
+  FCMService(this._notificationService, this._localNotificationService);
 
   String? get fcmToken => _fcmToken;
 
@@ -51,7 +53,8 @@ class FCMService {
       _firebaseMessaging.onTokenRefresh.listen((newToken) {
         debugPrint('FCM 토큰 갱신: $newToken');
         _fcmToken = newToken;
-        _saveTokenToServer(newToken);
+        // 로그인 상태일 때만 토큰을 저장하도록 로직 변경
+        // _saveTokenToServer(newToken);
       });
 
       debugPrint('✅ FCM 초기화 완료');
@@ -104,9 +107,10 @@ class FCMService {
       _fcmToken = await _firebaseMessaging.getToken();
       debugPrint('📱 FCM 토큰: $_fcmToken');
 
-      if (_fcmToken != null) {
-        await _saveTokenToServer(_fcmToken!);
-      }
+      // 로그인 전이므로 여기서는 저장하지 않음
+      // if (_fcmToken != null) {
+      //   await _saveTokenToServer(_fcmToken!);
+      // }
 
       return _fcmToken;
     } catch (e) {
@@ -127,6 +131,15 @@ class FCMService {
     }
   }
 
+  /// 로그인 후 FCM 토큰을 서버에 전송
+  Future<void> sendFcmTokenToServer() async {
+    if (_fcmToken != null) {
+      await _saveTokenToServer(_fcmToken!);
+    } else {
+      debugPrint('⚠️ FCM 토큰이 아직 준비되지 않아 서버에 전송할 수 없습니다.');
+    }
+  }
+
   /// 포그라운드 메시지 처리
   void _handleForegroundMessage(RemoteMessage message) {
     debugPrint('📬 포그라운드 메시지 수신: ${message.messageId}');
@@ -134,7 +147,15 @@ class FCMService {
     debugPrint('내용: ${message.notification?.body}');
     debugPrint('데이터: ${message.data}');
 
-    // TODO: 로컬 알림 표시 또는 UI 업데이트
+    final notification = message.notification;
+    if (notification != null && notification.title != null && notification.body != null) {
+      _localNotificationService.showNotification(
+        id: notification.hashCode,
+        title: notification.title!,
+        body: notification.body!,
+        payload: message.data.toString(),
+      );
+    }
   }
 
   /// 백그라운드에서 알림 클릭으로 앱 열림 처리

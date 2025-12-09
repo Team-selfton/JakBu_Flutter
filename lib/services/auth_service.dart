@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/auth_models.dart';
 import 'api_client.dart';
+import '../main.dart'; // fcmService에 접근하기 위해 추가
 
 class AuthService {
   final ApiClient _apiClient;
@@ -18,6 +19,8 @@ class AuthService {
         authResponse.accessToken,
         authResponse.refreshToken,
       );
+      // 로그인 성공 후 FCM 토큰 전송
+      await fcmService.sendFcmTokenToServer();
       return authResponse;
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
@@ -39,6 +42,8 @@ class AuthService {
         authResponse.accessToken,
         authResponse.refreshToken,
       );
+      // 로그인 성공 후 FCM 토큰 전송
+      await fcmService.sendFcmTokenToServer();
       return authResponse;
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {

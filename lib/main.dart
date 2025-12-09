@@ -6,6 +6,7 @@ import 'services/notification_service.dart';
 import 'services/api_client.dart';
 import 'pages/splash_screen.dart';
 import 'pages/auth_screen.dart';
+import 'services/local_notification_service.dart';
 import 'pages/main_app.dart';
 
 // 전역 FCM 서비스 인스턴스
@@ -31,12 +32,16 @@ Future<void> _initializeFirebase() async {
     );
     debugPrint('✅ Firebase 초기화 완료');
 
+    // 로컬 알림 서비스 초기화
+    final localNotificationService = LocalNotificationService();
+    await localNotificationService.init();
+
     // API 클라이언트 및 서비스 초기화
     final apiClient = ApiClient();
     final notificationService = NotificationService(apiClient);
 
     // FCM 서비스 초기화
-    fcmService = FCMService(notificationService);
+    fcmService = FCMService(notificationService, localNotificationService);
     await fcmService.initialize();
 
     debugPrint('✅ FCM 초기화 완료');
