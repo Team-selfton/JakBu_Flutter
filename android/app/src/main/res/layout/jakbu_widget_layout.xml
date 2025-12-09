@@ -11,23 +11,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="👊 JakBu"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="#FFFFFF" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="오늘의 할일"
+        android:textSize="12sp"
+        android:textColor="#CCFFFFFF"
+        android:layout_marginTop="2dp" />
 
     <!-- 카운트 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="12dp">
 
         <TextView
             android:id="@+id/widget_remaining_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0"
-            android:textSize="20sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="#FFFFFF" />
 
@@ -36,6 +44,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=" / 0"
+            android:textSize="14sp"
+            android:textColor="#CCFFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" 남음"
             android:textSize="12sp"
             android:textColor="#CCFFFFFF" />
     </LinearLayout>
@@ -77,31 +92,43 @@
         android:layout_marginTop="6dp"
         android:visibility="gone" />
 
-    <!-- 빈 상태 -->
+    <!-- 빈 상태 메시지 -->
     <TextView
         android:id="@+id/widget_empty_state"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="할일이 없어요!"
-        android:textSize="12sp"
+        android:text="할일을 추가해보세요"
+        android:textSize="13sp"
         android:textColor="#CCFFFFFF"
         android:gravity="center"
-        android:padding="12dp"
+        android:padding="20dp"
         android:layout_marginTop="12dp"
         android:visibility="gone" />
 
-    <!-- 할일 추가 버튼 -->
+    <!-- 입력 필드처럼 보이는 버튼 -->
+    <TextView
+        android:id="@+id/widget_input_fake"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="새 할일..."
+        android:textSize="13sp"
+        android:textColor="#99FFFFFF"
+        android:padding="12dp"
+        android:background="#33FFFFFF"
+        android:layout_marginTop="16dp" />
+
+    <!-- 추가 버튼 -->
     <TextView
         android:id="@+id/widget_add_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="+ 할일 추가하기"
-        android:textSize="12sp"
+        android:text="+ 추가하기"
+        android:textSize="13sp"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:gravity="center"
         android:padding="12dp"
-        android:background="#33FFFFFF"
-        android:layout_marginTop="20dp" />
+        android:background="#66FFFFFF"
+        android:layout_marginTop="8dp" />
 
 </LinearLayout>

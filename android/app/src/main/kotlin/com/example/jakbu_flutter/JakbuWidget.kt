@@ -107,6 +107,7 @@ internal fun updateAppWidget(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_add_button, pendingIntent)
+        views.setOnClickPendingIntent(R.id.widget_input_fake, pendingIntent)
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views)
