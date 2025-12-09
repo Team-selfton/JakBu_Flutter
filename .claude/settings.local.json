@@ -24,7 +24,8 @@
       "Bash(flutter logs:*)",
       "Bash(killall:*)",
       "Bash(xcrun simctl spawn:*)",
-      "Bash(idevicesyslog:*)"
+      "Bash(idevicesyslog:*)",
+      "Bash(flutter analyze:*)"
     ],
     "deny": [],
     "ask": []
