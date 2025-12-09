@@ -17,9 +17,31 @@ class _MainAppState extends State<MainApp> {
   final AuthService _authService = AuthService(ApiClient());
 
   void _logout() async {
-    await _authService.logout();
-    if (mounted) {
-      widget.onLogout();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('로그아웃'),
+          content: const Text('정말 로그아웃하시겠습니까?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('로그아웃'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await _authService.logout();
+      if (mounted) {
+        widget.onLogout();
+      }
     }
   }
 
