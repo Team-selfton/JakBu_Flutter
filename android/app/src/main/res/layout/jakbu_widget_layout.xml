@@ -4,25 +4,104 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#FF4470B3"
-    android:gravity="center">
+    android:background="#FF4470B3">
 
+    <!-- 헤더 -->
     <TextView
-        android:id="@+id/widget_test_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="JakBu 위젯 테스트"
+        android:text="👊 JakBu"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textColor="#FFFFFF" />
 
+    <!-- 카운트 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:id="@+id/widget_remaining_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/widget_total_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" / 0"
+            android:textSize="12sp"
+            android:textColor="#CCFFFFFF" />
+    </LinearLayout>
+
+    <!-- Todo 1 -->
     <TextView
-        android:id="@+id/widget_remaining_count"
+        android:id="@+id/todo_item_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="#33FFFFFF"
+        android:textSize="12sp"
+        android:textColor="#FFFFFF"
+        android:maxLines="1"
+        android:layout_marginTop="12dp"
+        android:visibility="gone" />
+
+    <!-- Todo 2 -->
+    <TextView
+        android:id="@+id/todo_item_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="#33FFFFFF"
+        android:layout_marginTop="6dp"
+        android:textSize="12sp"
+        android:textColor="#FFFFFF"
+        android:maxLines="1"
+        android:visibility="gone" />
+
+    <!-- 더보기 텍스트 -->
+    <TextView
+        android:id="@+id/widget_more_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0"
-        android:textSize="32sp"
+        android:text="+3개 더"
+        android:textSize="10sp"
+        android:textColor="#CCFFFFFF"
+        android:layout_marginTop="6dp"
+        android:visibility="gone" />
+
+    <!-- 빈 상태 -->
+    <TextView
+        android:id="@+id/widget_empty_state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="할일이 없어요!"
+        android:textSize="12sp"
+        android:textColor="#CCFFFFFF"
+        android:gravity="center"
+        android:padding="12dp"
+        android:layout_marginTop="12dp"
+        android:visibility="gone" />
+
+    <!-- 할일 추가 버튼 -->
+    <TextView
+        android:id="@+id/widget_add_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="+ 할일 추가하기"
+        android:textSize="12sp"
         android:textColor="#FFFFFF"
-        android:layout_marginTop="16dp" />
+        android:textStyle="bold"
+        android:gravity="center"
+        android:padding="12dp"
+        android:background="#33FFFFFF"
+        android:layout_marginTop="20dp" />
 
 </LinearLayout>
