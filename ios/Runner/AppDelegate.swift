@@ -9,6 +9,7 @@ import FirebaseMessaging
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    FirebaseApp.configure() // Firebase 네이티브 초기화
     GeneratedPluginRegistrant.register(with: self)
 
     if #available(iOS 10.0, *) {

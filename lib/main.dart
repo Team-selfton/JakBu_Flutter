@@ -15,11 +15,11 @@ late FCMService fcmService;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 먼저 앱 UI를 시작
-  runApp(const MyApp());
+  // runApp()을 호출하기 전에 모든 초기화가 완료되도록 기다립니다.
+  await _initializeFirebase();
 
-  // Firebase 초기화를 백그라운드에서 실행
-  _initializeFirebase();
+  // 모든 초기화가 완료된 후 앱 UI를 시작
+  runApp(const MyApp());
 }
 
 Future<void> _initializeFirebase() async {
