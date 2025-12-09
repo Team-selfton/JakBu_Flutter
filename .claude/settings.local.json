@@ -20,7 +20,11 @@
       "Bash($HOME/.pub-cache/bin/flutterfire configure:*)",
       "Bash(flutter devices:*)",
       "Bash(adb shell:*)",
-      "Bash(adb -e emu kill:*)"
+      "Bash(adb -e emu kill:*)",
+      "Bash(flutter logs:*)",
+      "Bash(killall:*)",
+      "Bash(xcrun simctl spawn:*)",
+      "Bash(idevicesyslog:*)"
     ],
     "deny": [],
     "ask": []

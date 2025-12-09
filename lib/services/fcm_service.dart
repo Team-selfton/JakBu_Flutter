@@ -89,18 +89,16 @@ class FCMService {
   /// FCM 토큰 가져오기
   Future<String?> _getToken() async {
     try {
-      // iOS의 경우 APNs 토큰이 설정될 때까지 기다림
+      // iOS의 경우 APNs 토큰을 먼저 가져와야 할 수 있습니다.
       if (defaultTargetPlatform == TargetPlatform.iOS) {
-        debugPrint('⏳ iOS APNs 토큰 대기 중...');
-        // APNs 토큰 확인 (최대 5초 대기)
-        for (int i = 0; i < 10; i++) {
-          final apnsToken = await _firebaseMessaging.getAPNSToken();
-          if (apnsToken != null) {
-            debugPrint('✅ APNs 토큰 확인: ${apnsToken.substring(0, 20)}...');
-            break;
-          }
-          await Future.delayed(const Duration(milliseconds: 500));
+        debugPrint('⏳ iOS APNs 토큰 요청 중...');
+        final apnsToken = await _firebaseMessaging.getAPNSToken();
+        if (apnsToken == null) {
+          debugPrint('⚠️ APNs 토큰을 즉시 가져올 수 없습니다. onTokenRefresh 스트림이 토큰을 처리할 때까지 기다립니다.');
+          // onTokenRefresh가 나중에 호출될 것이므로 여기서 getToken()을 호출하지 않습니다.
+          return null;
         }
+        debugPrint('✅ APNs 토큰 수신 완료.');
       }
 
       _fcmToken = await _firebaseMessaging.getToken();
