@@ -96,8 +96,8 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   void _updateWidget() {
-    final activeTodos = _todos.where((todo) => !todo.completed).length;
-    WidgetService.updateWidget(todoCount: activeTodos);
+    // 위젯 업데이트는 TodoPage에서만 처리
+    // Lock screen은 별도의 todo 리스트를 사용하므로 위젯 업데이트 안 함
   }
 
   Color _getPriorityColor(Priority priority) {

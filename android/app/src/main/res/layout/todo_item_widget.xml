@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="@drawable/todo_item_background"
+    android:layout_marginBottom="6dp"
+    android:gravity="center_vertical"
+    android:visibility="gone">
+
+    <TextView
+        android:id="@+id/todo_checkbox"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:text="○"
+        android:textSize="16sp"
+        android:textColor="#80FFFFFF"
+        android:gravity="center"
+        android:layout_marginEnd="10dp" />
+
+    <TextView
+        android:id="@+id/todo_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="할일"
+        android:textSize="13sp"
+        android:textColor="#E6FFFFFF"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+</LinearLayout>

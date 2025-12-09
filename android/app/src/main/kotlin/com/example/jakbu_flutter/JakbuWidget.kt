@@ -3,9 +3,16 @@ package com.example.jakbu_flutter
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
-import java.text.SimpleDateFormat
-import java.util.*
+import org.json.JSONArray
+
+data class TodoItem(
+    val id: Int,
+    val title: String,
+    val isDone: Boolean
+)
 
 class JakbuWidget : AppWidgetProvider() {
     override fun onUpdate(
@@ -19,11 +26,11 @@ class JakbuWidget : AppWidgetProvider() {
     }
 
     override fun onEnabled(context: Context) {
-        // Enter relevant functionality for when the first widget is created
+        Log.d("JakbuWidget", "Widget enabled")
     }
 
     override fun onDisabled(context: Context) {
-        // Enter relevant functionality for when the last widget is disabled
+        Log.d("JakbuWidget", "Widget disabled")
     }
 }
 
@@ -34,19 +41,52 @@ internal fun updateAppWidget(
 ) {
     val views = RemoteViews(context.packageName, R.layout.jakbu_widget_layout)
 
-    // Update time
-    val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-    views.setTextViewText(R.id.widget_time, currentTime)
+    try {
+        // Get todo data from shared preferences
+        val sharedPref = context.getSharedPreferences("HomeWidgetPreferences", Context.MODE_PRIVATE)
+        val todosJson = sharedPref.getString("widget_todos", "[]")
+        Log.d("JakbuWidget", "Todos JSON: $todosJson")
 
-    // Update date
-    val currentDate = SimpleDateFormat("MM. dd. (E)", Locale.KOREAN).format(Date())
-    views.setTextViewText(R.id.widget_date, currentDate)
+        val todos = parseTodos(todosJson ?: "[]")
+        Log.d("JakbuWidget", "Parsed ${todos.size} todos")
 
-    // Update todo count (you'll need to get this from shared preferences)
-    val sharedPref = context.getSharedPreferences("HomeWidgetPreferences", Context.MODE_PRIVATE)
-    val todoCount = sharedPref.getInt("todo_count", 0)
-    views.setTextViewText(R.id.widget_todo_count, "오늘 할일 ${todoCount}개")
+        val totalCount = todos.size
+        val completedCount = todos.count { it.isDone }
+        val remainingCount = totalCount - completedCount
 
-    // Instruct the widget manager to update the widget
-    appWidgetManager.updateAppWidget(appWidgetId, views)
+        // Update count
+        views.setTextViewText(R.id.widget_remaining_count, "$remainingCount")
+
+        // Instruct the widget manager to update the widget
+        appWidgetManager.updateAppWidget(appWidgetId, views)
+        Log.d("JakbuWidget", "Widget updated successfully")
+
+    } catch (e: Exception) {
+        Log.e("JakbuWidget", "Error updating widget", e)
+
+        // 오류 발생 시 기본 상태 표시
+        views.setTextViewText(R.id.widget_remaining_count, "ERR")
+
+        appWidgetManager.updateAppWidget(appWidgetId, views)
+    }
+}
+
+private fun parseTodos(jsonString: String): List<TodoItem> {
+    val todos = mutableListOf<TodoItem>()
+    try {
+        val jsonArray = JSONArray(jsonString)
+        for (i in 0 until jsonArray.length()) {
+            val jsonObject = jsonArray.getJSONObject(i)
+            todos.add(
+                TodoItem(
+                    id = jsonObject.getInt("id"),
+                    title = jsonObject.getString("title"),
+                    isDone = jsonObject.getBoolean("isDone")
+                )
+            )
+        }
+    } catch (e: Exception) {
+        Log.e("JakbuWidget", "Error parsing todos", e)
+    }
+    return todos
 }

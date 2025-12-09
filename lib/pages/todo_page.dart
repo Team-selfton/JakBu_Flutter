@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../services/api_client.dart';
 import '../services/todo_service.dart';
 import '../services/live_activity_service.dart';
+import '../services/widget_service.dart';
 import '../models/todo_models.dart';
 
 class TodoPage extends StatefulWidget {
@@ -25,10 +26,15 @@ class _TodoPageState extends State<TodoPage> {
     _todoService = TodoService(ApiClient());
     _loadTodayTodos();
     _initializeLiveActivity();
+    _initializeWidget();
   }
 
   Future<void> _initializeLiveActivity() async {
     await _liveActivityService.getAllActivities();
+  }
+
+  Future<void> _initializeWidget() async {
+    await WidgetService.initWidget();
   }
 
   @override
@@ -50,6 +56,8 @@ class _TodoPageState extends State<TodoPage> {
         });
         // Live Activity 업데이트
         await _liveActivityService.updateActivity(_todos);
+        // 위젯 업데이트
+        await WidgetService.updateWidget(_todos);
       }
     } catch (e) {
       if (mounted) {
@@ -82,6 +90,8 @@ class _TodoPageState extends State<TodoPage> {
         });
         // Live Activity 업데이트
         await _liveActivityService.updateActivity(_todos);
+        // 위젯 업데이트
+        await WidgetService.updateWidget(_todos);
       }
     } catch (e) {
       if (mounted) {
@@ -102,6 +112,8 @@ class _TodoPageState extends State<TodoPage> {
         });
         // Live Activity 업데이트
         await _liveActivityService.updateActivity(_todos);
+        // 위젯 업데이트
+        await WidgetService.updateWidget(_todos);
       }
     } catch (e) {
       if (mounted) {
