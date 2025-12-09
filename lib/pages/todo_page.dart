@@ -463,26 +463,22 @@ class _TodoPageState extends State<TodoPage> {
             ),
           ),
           const SizedBox(height: 12),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              if (todos.isEmpty) _buildEmptyListPlaceholder(isCompleted),
-              AnimatedList(
-                key: listKey,
-                initialItemCount: todos.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index, animation) {
-                  // Check for index out of bounds
-                  if (index >= todos.length) {
-                    return const SizedBox.shrink();
-                  }
-                  final todo = todos[index];
-                  return _buildAnimatedTodoItem(todo, isCompleted, animation);
-                },
-              ),
-            ],
-          ),
+          todos.isEmpty
+              ? _buildEmptyListPlaceholder(isCompleted)
+              : AnimatedList(
+                  key: listKey,
+                  initialItemCount: todos.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index, animation) {
+                    // Check for index out of bounds
+                    if (index >= todos.length) {
+                      return const SizedBox.shrink();
+                    }
+                    final todo = todos[index];
+                    return _buildAnimatedTodoItem(todo, isCompleted, animation);
+                  },
+                ),
         ],
       ),
     );
