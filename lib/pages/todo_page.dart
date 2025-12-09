@@ -15,6 +15,11 @@ class TodoPage extends StatefulWidget {
 
 class _TodoPageState extends State<TodoPage> {
   List<TodoModel> _todos = [];
+  List<TodoModel> _activeTodos = [];
+  List<TodoModel> _completedTodos = [];
+  final _activeListKey = GlobalKey<AnimatedListState>();
+  final _completedListKey = GlobalKey<AnimatedListState>();
+
   final TextEditingController _textController = TextEditingController();
   late final TodoService _todoService;
   final LiveActivityService _liveActivityService = LiveActivityService();
@@ -53,6 +58,10 @@ class _TodoPageState extends State<TodoPage> {
       if (mounted) {
         setState(() {
           _todos = todos;
+          _activeTodos =
+              _todos.where((todo) => todo.status == TodoStatus.todo).toList();
+          _completedTodos =
+              _todos.where((todo) => todo.status == TodoStatus.done).toList();
         });
         // Live Activity 업데이트
         await _liveActivityService.updateActivity(_todos);
@@ -84,10 +93,14 @@ class _TodoPageState extends State<TodoPage> {
       );
 
       if (mounted) {
+        _todos.add(newTodo);
+        _activeTodos.insert(0, newTodo);
+        _activeListKey.currentState?.insertItem(0);
+        
         setState(() {
-          _todos.add(newTodo);
           _textController.clear();
         });
+
         // Live Activity 업데이트
         await _liveActivityService.updateActivity(_todos);
         // 위젯 업데이트
@@ -104,20 +117,59 @@ class _TodoPageState extends State<TodoPage> {
     final todoIndex = _todos.indexWhere((t) => t.id == id);
     if (todoIndex == -1) return;
 
+    final todo = _todos[todoIndex];
+    final isCompleted = todo.status == TodoStatus.done;
+
+    // Determine source and destination
+    final sourceList = isCompleted ? _completedTodos : _activeTodos;
+    final destinationList = isCompleted ? _activeTodos : _completedTodos;
+    final sourceKey = isCompleted ? _completedListKey : _activeListKey;
+    final destinationKey = isCompleted ? _activeListKey : _completedListKey;
+
+    final indexInSource = sourceList.indexWhere((t) => t.id == id);
+    if (indexInSource == -1) return; // Should not happen
+
+    // --- Optimistic UI Update ---
+
+    // 1. Remove from source list (UI)
+    final removedItem = sourceList.removeAt(indexInSource);
+    sourceKey.currentState?.removeItem(
+      indexInSource,
+      (context, animation) =>
+          _buildAnimatedTodoItem(removedItem, isCompleted, animation),
+      duration: const Duration(milliseconds: 300),
+    );
+
+    // 2. Create the updated item for the destination list
+    final updatedItem = TodoModel(
+      id: removedItem.id,
+      title: removedItem.title,
+      date: removedItem.date,
+      status: isCompleted ? TodoStatus.todo : TodoStatus.done,
+    );
+
+    // 3. Add to destination list (UI)
+    destinationList.insert(0, updatedItem);
+    destinationKey.currentState?.insertItem(0,
+        duration: const Duration(milliseconds: 300));
+
+    // 4. Update the master list
+    _todos[todoIndex] = updatedItem;
+
+    // Trigger updates for widgets
+    await _liveActivityService.updateActivity(_todos);
+    await WidgetService.updateWidget(_todos);
+
+    // --- API Call ---
     try {
-      final updatedTodo = await _todoService.toggleTodoStatus(id);
-      if (mounted) {
-        setState(() {
-          _todos[todoIndex] = updatedTodo;
-        });
-        // Live Activity 업데이트
-        await _liveActivityService.updateActivity(_todos);
-        // 위젯 업데이트
-        await WidgetService.updateWidget(_todos);
-      }
+      // 5. Call the API
+      await _todoService.toggleTodoStatus(id);
     } catch (e) {
       if (mounted) {
-        _showError('할일 상태 변경에 실패했습니다: ${e.toString()}');
+        _showError('상태 변경 동기화 실패: ${e.toString()}');
+        // --- Revert UI on failure ---
+        // For simplicity, we reload the state from the server.
+        await _loadTodayTodos();
       }
     }
   }
@@ -140,9 +192,6 @@ class _TodoPageState extends State<TodoPage> {
         ),
       );
     }
-
-    final activeTodos = _todos.where((todo) => todo.status == TodoStatus.todo).toList();
-    final completedTodos = _todos.where((todo) => todo.status == TodoStatus.done).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
@@ -289,16 +338,14 @@ class _TodoPageState extends State<TodoPage> {
           ),
 
           // Active todos
-          if (activeTodos.isNotEmpty) ...[
+          if (_activeTodos.isNotEmpty) ...[
             const SizedBox(height: 20),
-            _buildTodoSection('Todo', activeTodos, false),
+            _buildTodoSection('Todo', _activeTodos, false),
           ],
 
           // Completed todos
-          if (completedTodos.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            _buildTodoSection('Done', completedTodos, true),
-          ],
+          const SizedBox(height: 16),
+          _buildTodoSection('Done', _completedTodos, true),
 
           // Empty state
           if (_todos.isEmpty) ...[
@@ -377,6 +424,8 @@ class _TodoPageState extends State<TodoPage> {
   }
 
   Widget _buildTodoSection(String title, List<TodoModel> todos, bool isCompleted) {
+    final listKey = isCompleted ? _completedListKey : _activeListKey;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -414,8 +463,60 @@ class _TodoPageState extends State<TodoPage> {
             ),
           ),
           const SizedBox(height: 12),
-          ...todos.map((todo) => _buildTodoItem(todo, isCompleted)),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              if (todos.isEmpty) _buildEmptyListPlaceholder(isCompleted),
+              AnimatedList(
+                key: listKey,
+                initialItemCount: todos.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index, animation) {
+                  // Check for index out of bounds
+                  if (index >= todos.length) {
+                    return const SizedBox.shrink();
+                  }
+                  final todo = todos[index];
+                  return _buildAnimatedTodoItem(todo, isCompleted, animation);
+                },
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyListPlaceholder(bool isCompleted) {
+    final message = isCompleted
+        ? '아직 완료된 할일이 없어요.\n할일을 완료해 보세요!'
+        : '오늘의 할일이 없어요.\n새로운 할일을 추가해 보세요!';
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      alignment: Alignment.center,
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.white.withOpacity(0.5),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedTodoItem(
+      TodoModel todo, bool isCompleted, Animation<double> animation) {
+    return FadeTransition(
+      opacity: animation,
+      child: SizeTransition(
+        sizeFactor: CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOut,
+        ),
+        child: _buildTodoItem(todo, isCompleted),
       ),
     );
   }
