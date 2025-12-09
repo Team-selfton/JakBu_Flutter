@@ -38,6 +38,12 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _onLogout() {
+    setState(() {
+      _currentScreen = AppScreen.auth;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -54,7 +60,7 @@ class _MyAppState extends State<MyApp> {
             )
           : _currentScreen == AppScreen.auth
               ? AuthScreen(onLoginComplete: _onLoginComplete)
-              : const MainApp(),
+              : MainApp(onLogout: _onLogout),
     );
   }
 }

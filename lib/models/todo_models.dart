@@ -1,4 +1,4 @@
-enum TodoStatus { TODO, DONE }
+enum TodoStatus { todo, done }
 
 class TodoModel {
   final int id;
@@ -17,14 +17,14 @@ class TodoModel {
         id: json['id'],
         title: json['title'],
         date: json['date'],
-        status: json['status'] == 'DONE' ? TodoStatus.DONE : TodoStatus.TODO,
+        status: json['status'] == 'DONE' ? TodoStatus.done : TodoStatus.todo,
       );
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'title': title,
         'date': date,
-        'status': status == TodoStatus.DONE ? 'DONE' : 'TODO',
+        'status': status == TodoStatus.done ? 'DONE' : 'TODO',
       };
 }
 

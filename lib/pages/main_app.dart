@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:jakbu_flutter/services/api_client.dart';
+import 'package:jakbu_flutter/services/auth_service.dart';
 import 'todo_page.dart';
 import 'calendar_page.dart';
 
 class MainApp extends StatefulWidget {
-  const MainApp({super.key});
+  final VoidCallback onLogout;
+  const MainApp({super.key, required this.onLogout});
 
   @override
   State<MainApp> createState() => _MainAppState();
@@ -11,6 +14,14 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   int _activeTab = 0; // 0: todo, 1: calendar
+  final AuthService _authService = AuthService(ApiClient());
+
+  void _logout() async {
+    await _authService.logout();
+    if (mounted) {
+      widget.onLogout();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +47,7 @@ class _MainAppState extends State<MainApp> {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withAlpha(26),
                       width: 2,
                     ),
                   ),
@@ -54,6 +65,11 @@ class _MainAppState extends State<MainApp> {
                         '캘린더',
                         1,
                       ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.logout, color: Colors.white),
+                      onPressed: _logout,
+                      tooltip: '로그아웃',
                     ),
                   ],
                 ),
@@ -98,7 +114,7 @@ class _MainAppState extends State<MainApp> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isActive ? Colors.white : Colors.white.withOpacity(0.5),
+            color: isActive ? Colors.white : Colors.white.withAlpha(128),
           ),
         ),
       ),

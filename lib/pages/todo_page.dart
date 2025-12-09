@@ -129,8 +129,8 @@ class _TodoPageState extends State<TodoPage> {
       );
     }
 
-    final activeTodos = _todos.where((todo) => todo.status == TodoStatus.TODO).toList();
-    final completedTodos = _todos.where((todo) => todo.status == TodoStatus.DONE).toList();
+    final activeTodos = _todos.where((todo) => todo.status == TodoStatus.todo).toList();
+    final completedTodos = _todos.where((todo) => todo.status == TodoStatus.done).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),

@@ -23,9 +23,7 @@ class LiveActivityService {
 
       // 새로운 Activity 시작
       _activityId = await _liveActivitiesPlugin.createActivity(activityData);
-      print('Live Activity started: $_activityId');
     } catch (e) {
-      print('Failed to start Live Activity: $e');
     }
   }
 
@@ -48,9 +46,7 @@ class LiveActivityService {
         _activityId!,
         activityData,
       );
-      print('Live Activity updated');
     } catch (e) {
-      print('Failed to update Live Activity: $e');
       // Activity가 종료되었을 수 있으므로 다시 시작
       _activityId = null;
       await startTodoActivity(todos);
@@ -63,24 +59,22 @@ class LiveActivityService {
 
     try {
       await _liveActivitiesPlugin.endActivity(_activityId!);
-      print('Live Activity ended');
       _activityId = null;
     } catch (e) {
-      print('Failed to end Live Activity: $e');
       _activityId = null;
     }
   }
 
   // Activity 데이터 빌드
   Map<String, dynamic> _buildActivityData(List<TodoModel> todos) {
-    final completedCount = todos.where((t) => t.status == TodoStatus.DONE).length;
+    final completedCount = todos.where((t) => t.status == TodoStatus.done).length;
 
     return {
       'startDate': DateTime.now().toIso8601String(),
       'todos': todos.map((todo) => {
         'id': todo.id,
         'title': todo.title,
-        'isDone': todo.status == TodoStatus.DONE,
+        'isDone': todo.status == TodoStatus.done,
       }).toList(),
       'totalCount': todos.length,
       'completedCount': completedCount,
@@ -91,13 +85,11 @@ class LiveActivityService {
   Future<void> getAllActivities() async {
     try {
       final activities = await _liveActivitiesPlugin.getAllActivities();
-      print('Active activities: $activities');
 
       if (activities.isNotEmpty) {
         _activityId = activities.keys.first;
       }
     } catch (e) {
-      print('Failed to get activities: $e');
     }
   }
 

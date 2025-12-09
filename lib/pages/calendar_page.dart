@@ -107,8 +107,8 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    final activeTodos = _todos.where((todo) => todo.status == TodoStatus.TODO).toList();
-    final completedTodos = _todos.where((todo) => todo.status == TodoStatus.DONE).toList();
+    final activeTodos = _todos.where((todo) => todo.status == TodoStatus.todo).toList();
+    final completedTodos = _todos.where((todo) => todo.status == TodoStatus.done).toList();
     final now = DateTime.now();
     final todayDate = now.day;
     final isCurrentMonth = _currentDate.year == now.year && _currentDate.month == now.month;
@@ -473,7 +473,7 @@ class _CalendarPageState extends State<CalendarPage> {
             ),
           ),
           const SizedBox(height: 12),
-          ...todos.map((todo) => _buildTodoItem(todo, isCompleted)).toList(),
+          ...todos.map((todo) => _buildTodoItem(todo, isCompleted)),
         ],
       ),
     );

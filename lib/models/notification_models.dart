@@ -1,4 +1,4 @@
-enum IntervalType { TWO_HOUR, FOUR_HOUR, DAILY }
+enum IntervalType { twoHour, fourHour, daily }
 
 class FcmTokenRequest {
   final String fcmToken;
@@ -31,13 +31,13 @@ class NotificationSetting {
   static IntervalType _parseIntervalType(String type) {
     switch (type) {
       case 'TWO_HOUR':
-        return IntervalType.TWO_HOUR;
+        return IntervalType.twoHour;
       case 'FOUR_HOUR':
-        return IntervalType.FOUR_HOUR;
+        return IntervalType.fourHour;
       case 'DAILY':
-        return IntervalType.DAILY;
+        return IntervalType.daily;
       default:
-        return IntervalType.TWO_HOUR;
+        return IntervalType.twoHour;
     }
   }
 }
@@ -58,11 +58,11 @@ class NotificationSettingRequest {
 
   static String _intervalTypeToString(IntervalType type) {
     switch (type) {
-      case IntervalType.TWO_HOUR:
+      case IntervalType.twoHour:
         return 'TWO_HOUR';
-      case IntervalType.FOUR_HOUR:
+      case IntervalType.fourHour:
         return 'FOUR_HOUR';
-      case IntervalType.DAILY:
+      case IntervalType.daily:
         return 'DAILY';
     }
   }

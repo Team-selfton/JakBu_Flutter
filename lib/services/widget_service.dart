@@ -12,7 +12,6 @@ class WidgetService {
         iOSName: 'JakbuWidget',
       );
     } catch (e) {
-      print('Error updating widget: $e');
     }
   }
 
@@ -20,7 +19,6 @@ class WidgetService {
     try {
       await HomeWidget.setAppGroupId('group.com.example.jakbu_flutter');
     } catch (e) {
-      print('Error initializing widget: $e');
     }
   }
 }
