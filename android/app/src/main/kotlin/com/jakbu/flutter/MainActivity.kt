@@ -1,4 +1,4 @@
-package com.example.jakbu_flutter
+package com.jakbu.flutter
 
 import io.flutter.embedding.android.FlutterActivity
 

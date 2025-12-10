@@ -1,4 +1,4 @@
-package com.example.jakbu_flutter
+package com.jakbu.flutter
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
